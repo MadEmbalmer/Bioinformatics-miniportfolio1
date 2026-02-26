@@ -15,6 +15,24 @@ The focus of this repository is not leaderboard optimization, but **research-dri
 
 ---
 
+##  Upstream Data & Feature Engineering Pipeline
+
+The models in this repository were trained on a dataset curated through a larger preprocessing pipeline developed during the Kaggle RNA 3D competition.
+
+That upstream pipeline included:
+
+- Temporal leakage control (CASP-style cutoff enforcement)  
+- Structural RMSD-based deduplication  
+- Multi-conformer structure merging  
+- MSA-derived features (PSSM + positional entropy)  
+- RNAfold secondary structure integration  
+- Graph spectral features  
+- Backbone torsion extraction from PDB  
+- Coordinate normalization and augmentation  
+- Structural motif detection  
+
+---
+
 #  Modeling Philosophy
 
 RNA structure prediction is challenging due to:
