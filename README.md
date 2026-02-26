@@ -1,4 +1,4 @@
-# 🧬 RNA 3D Structure Prediction via Geometric Deep Learning & Diffusion Modeling
+#  RNA 3D Structure Prediction via Geometric Deep Learning & Diffusion Modeling
 
 ## Overview
 
@@ -15,7 +15,7 @@ The focus of this repository is not leaderboard optimization, but **research-dri
 
 ---
 
-# 🧠 Modeling Philosophy
+#  Modeling Philosophy
 
 RNA structure prediction is challenging due to:
 
@@ -34,9 +34,9 @@ To address this, the modeling pipeline separates:
 
 ---
 
-# 🏗 Architecture
+#  Architecture
 
-## 1️⃣ Equivariant Graph Neural Network (EGNN)
+## 1️ Equivariant Graph Neural Network (EGNN)
 
 Located in: `models/egnn.py`
 
@@ -52,7 +52,7 @@ The EGNN serves as the denoising backbone inside the diffusion model.
 
 ---
 
-## 2️⃣ Diffusion-Based Torsion Model
+## 2️ Diffusion-Based Torsion Model
 
 Located in: `models/diffusion_model.py`
 
@@ -71,7 +71,7 @@ Torsions are predicted in **degrees**, using a cosine-based cyclic loss to respe
 
 ---
 
-## 3️⃣ Internal Coordinate Decoder
+## 3️ Internal Coordinate Decoder
 
 Located in: `utils/internal_coordinate_decoder.py`
 
@@ -86,7 +86,7 @@ It provides a lightweight geometric reconstruction layer suitable for ML pipelin
 
 ---
 
-# 🚀 Training
+#  Training
 
 Training entry point:
 
@@ -109,7 +109,7 @@ What happens:
 
 ---
 
-# 🧪 Inference & Structure Sampling
+#  Inference & Structure Sampling
 
 Inference entry point:
 
@@ -130,33 +130,8 @@ Pipeline:
 5. Select representative conformations  
 6. Optionally export PDB files or Kaggle-style submission.csv  
 
----
 
-# 📁 Repository Structure
-
-```
-RNA_3D_Generative_Modeling/
-│
-├── models/
-│   ├── egnn.py
-│   └── diffusion_model.py
-│
-├── utils/
-│   └── internal_coordinate_decoder.py
-│
-├── training/
-│   └── train_diffusion.py
-│
-├── inference/
-│   └── sample_structures.py
-│
-├── requirements.txt
-└── README.md
-```
-
----
-
-# 🔬 Experimental Observations
+#  Experimental Observations
 
 - Diffusion over torsion space enables structural diversity  
 - Cyclic loss stabilizes angular prediction  
@@ -168,7 +143,7 @@ This highlights the gap between local angular objectives and global structural e
 
 ---
 
-# 📊 Data
+#  Data
 
 The dataset originated from the Stanford RNA 3D Folding Kaggle competition (2025).
 
@@ -182,7 +157,7 @@ To reproduce:
 
 ---
 
-# 🧩 Future Directions
+#  Future Directions
 
 - Von Mises / circular distributions for torsion uncertainty  
 - Coordinate-level equivariant diffusion  
@@ -203,7 +178,7 @@ To reproduce:
 
 ---
 
-# 🎯 Project Context
+#  Project Context
 
 This project represents an independent geometric modeling exploration inspired by a Kaggle competition, emphasizing:
 
