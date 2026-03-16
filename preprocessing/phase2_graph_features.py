@@ -17,19 +17,19 @@ OUTPUT_RES_FEATURES = "features/msa_graph_features_residue.csv"
 GRAPH_DIR = "graphs"
 DOTBRACKET_DIR = "features/dotbracket"
 ALLOWED_BASES = ['A', 'C', 'G', 'U']
-MAX_EIGEN = 10
+MAX_EIGEN = 20
 
 # === Ensure directories exist === #
 os.makedirs(GRAPH_DIR, exist_ok=True)
 os.makedirs("features", exist_ok=True)
 
 # === Load Sequences === #
-print(" Loading cleaned sequences...")
+print("📄 Loading cleaned sequences...")
 df_seq = pd.read_csv(SEQ_FILE)
 clean_seqs = dict(zip(df_seq["target_id"], df_seq["clean_sequence"]))
 
 # === Load MSA PSSM Features === #
-print(" Loading MSA PSSM data...")
+print("📊 Loading MSA PSSM data...")
 msa_data = np.load(MSA_PSSM_FILE)
 
 # === Helper: Dot-bracket base pairs === #
@@ -65,7 +65,7 @@ def compute_laplacian_features(G):
     return eigvals_padded.tolist(), spectral_entropy, spectral_gap
 
 # === Graph Construction === #
-print("\U0001F9EC Building RNA graphs...")
+print("🧱 Building RNA graphs...")
 graph_stats = []
 for _, row in tqdm(df_seq.iterrows(), total=len(df_seq)):
     tid = row["target_id"]
@@ -78,13 +78,17 @@ for _, row in tqdm(df_seq.iterrows(), total=len(df_seq)):
     for i in range(len(seq) - 1):
         G.add_edge(i, i + 1, type="backbone")
 
+    has_basepairs = 0
     dbn_path = os.path.join(DOTBRACKET_DIR, f"{tid}.db")
     if os.path.exists(dbn_path):
         with open(dbn_path, "r") as f:
             dot = f.read().strip()
-            for i, j in parse_dotbracket(dot).items():
+            pairs = parse_dotbracket(dot)
+            for i, j in pairs.items():
                 if not G.has_edge(i, j):
                     G.add_edge(i, j, type="basepair")
+            if len(pairs) > 0:
+                has_basepairs = 1
 
     with open(os.path.join(GRAPH_DIR, f"{tid}.gpickle"), "wb") as f:
         pickle.dump(G, f)
@@ -99,17 +103,19 @@ for _, row in tqdm(df_seq.iterrows(), total=len(df_seq)):
         "avg_clustering": clustering,
         "num_nodes": len(G),
         "spectral_entropy": spec_entropy,
-        "spectral_gap": spec_gap
+        "spectral_gap": spec_gap,
+        "has_basepairs": has_basepairs
     }
     for k in range(MAX_EIGEN):
         stat_row[f"laplacian_eigval_{k}"] = eigvals[k]
 
     graph_stats.append(stat_row)
 
-print(f" Saved {len(graph_stats)} graphs.")
+graph_df = pd.DataFrame(graph_stats)
+graph_df.to_csv(GRAPH_STATS_FILE, index=False)
+print(f"✅ Saved graph stats to {GRAPH_STATS_FILE} with {len(graph_df)} entries.")
 
 # === Convert per-sequence MSA + graph to DataFrame === #
-graph_df = pd.DataFrame(graph_stats)
 msa_seq_df = pd.DataFrame([
     {
         "target_id": tid,
@@ -119,10 +125,10 @@ msa_seq_df = pd.DataFrame([
 ])
 merged_seq = graph_df.merge(msa_seq_df, on="target_id", how="inner")
 merged_seq.to_csv(OUTPUT_SEQ_FEATURES, index=False)
-print(f" Per-target MSA + graph features saved to `{OUTPUT_SEQ_FEATURES}` with shape {merged_seq.shape}")
+print(f"✅ Per-target MSA + graph features saved to `{OUTPUT_SEQ_FEATURES}` with shape {merged_seq.shape}")
 
 # === Generate Per-Residue MSA features === #
-print("\U0001F522 Generating per-residue MSA PSSM + entropy + conservation features...")
+print("🔬 Generating per-residue MSA PSSM + entropy + conservation features...")
 residue_rows = []
 for tid, mat in msa_data.items():
     seq = clean_seqs.get(tid)
@@ -142,4 +148,4 @@ for tid, mat in msa_data.items():
 
 df_residue = pd.DataFrame(residue_rows)
 df_residue.to_csv(OUTPUT_RES_FEATURES, index=False)
-print(f" Per-residue MSA features saved to `{OUTPUT_RES_FEATURES}` with shape {df_residue.shape}")
+print(f"✅ Per-residue MSA features saved to `{OUTPUT_RES_FEATURES}` with shape {df_residue.shape}")
