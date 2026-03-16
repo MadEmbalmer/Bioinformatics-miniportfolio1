@@ -17,6 +17,8 @@ The focus of this repository is not leaderboard optimization, but **research-dri
 
 ## Pipeline Overview
 
+The figure below summarizes the complete modeling pipeline implemented in this repository, from raw structural data preprocessing to geometric deep learning and diffusion-based structure generation.
+
 ![RNA 3D Structure Prediction Pipeline](docs/rna_pipeline_diagram.png)
 
 ---
