@@ -17,7 +17,7 @@ The focus of this repository is not leaderboard optimization, but **research-dri
 
 ## Pipeline Overview
 
-![RNA 3D Structure Prediction Pipeline](docs/pipeline_diagram.png)
+![RNA 3D Structure Prediction Pipeline](docs/rna_pipeline_diagram.png)
 
 ---
 
