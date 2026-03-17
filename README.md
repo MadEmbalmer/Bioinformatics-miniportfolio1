@@ -36,7 +36,7 @@ The preprocessing pipeline (see `preprocessing/` folder) covers 15 modules acros
 - Coordinate augmentation: Gaussian jitter, adversarial noise, random rotation
 - Structural geometry: bond angles, dihedrals, curvature, contact maps
 - Structural motif detection: A-minor, coaxial helix, kissing loop
-- Neural autoencoder + MiniBatchKMeans clustering at residue and RNA level
+- Two-stage feature clustering: IncrementalPCA (50 components) → neural autoencoder (latent dim=8) → MiniBatchKMeans at residue and RNA level, with a PCA-only baseline for comparison
 - Multi-task label extraction: 7 backbone torsions + pseudo-torsions + clash + curvature
 
 ---
