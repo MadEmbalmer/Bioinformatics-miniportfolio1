@@ -183,7 +183,10 @@ This highlights the gap between local angular objectives and global structural e
 - The internal coordinate decoder uses a simplified reconstruction that does not fully respect RNA backbone geometry, causing accumulated error in 3D coordinate reconstruction
 - Training was supervised only on pseudo-torsions (η, θ) rather than the full 8 backbone torsions extracted in Phase 1.4, leaving richer supervision signals unused
 - Secondary structure features were predicted using RNAfold (single MFE structure), which does not account for pseudoknots or conformational variability
-- These limitations explain the gap between local torsion-space training objectives and global topology-based evaluation metrics (TM-score, MCQ) — a challenge documented in the RNA structure prediction literature
+- These limitations explain the gap between local torsion-space training objectives and global topology-based evaluation metrics (TM-score, MCQ) — a challenge documented in the RNA structure prediction literature.
+- The BERT-based RNAfold surrogate model predictions were not integrated as input 
+  features to the EGNN denoiser, leaving a potentially informative secondary structure 
+  signal unused during training
 
 ---
 
