@@ -17,7 +17,7 @@ The focus of this repository is not leaderboard optimization, but **research-dri
 
 ## Pipeline Overview
 
-The figure below summarizes the complete modeling pipeline implemented in this repository, from raw structural data preprocessing to geometric deep learning and diffusion-based structure generation.
+The figure below summarizes the complete modeling pipeline, from raw structural data preprocessing to geometric deep learning and diffusion-based structure generation.
 
 ![RNA 3D Structure Prediction Pipeline](docs/rna_pipeline_diagram.png)
 
@@ -25,19 +25,19 @@ The figure below summarizes the complete modeling pipeline implemented in this r
 
 ## Upstream Data & Feature Engineering Pipeline
 
-The models in this repository were trained on a dataset curated through a larger preprocessing pipeline developed during the Kaggle RNA 3D competition.
+The preprocessing pipeline (see `preprocessing/` folder) covers 15 modules across 3 phases:
 
-That upstream pipeline included:
-
-- Temporal leakage control (CASP-style cutoff enforcement)
-- Structural RMSD-based deduplication
-- Multi-conformer structure merging
-- MSA-derived features (PSSM + positional entropy)
-- RNAfold secondary structure integration
-- Graph spectral features
-- Backbone torsion extraction from PDB
-- Coordinate normalization and augmentation
-- Structural motif detection
+- v1 + v2 data loading with temporal leakage control (CASP-style cutoff)
+- Structural RMSD deduplication and Kabsch-based conformation merging
+- MSA-derived features: PSSM + positional entropy + conservation (with fallback)
+- Full 8-angle backbone torsion extraction directly from PDB via RCSB API (α, β, γ, δ, ε, ζ, χ)
+- RNAfold secondary structure integration with BERT-based surrogate model
+- Graph spectral features (20 Laplacian eigenvalues, spectral entropy)
+- Coordinate augmentation: Gaussian jitter, adversarial noise, random rotation
+- Structural geometry: bond angles, dihedrals, curvature, contact maps
+- Structural motif detection: A-minor, coaxial helix, kissing loop
+- Neural autoencoder + MiniBatchKMeans clustering at residue and RNA level
+- Multi-task label extraction: 7 backbone torsions + pseudo-torsions + clash + curvature
 
 ---
 
@@ -116,7 +116,7 @@ Training entry point: `training/train_diffusion.py`
 ```bash
 python training/train_diffusion.py \
   --features features/final_merged_features.csv \
-  --torsions features/torsion_labels.csv \
+  --torsions features/multitask_labels.csv \
   --outdir checkpoints \
   --epochs 20 \
   --batch-size 8
@@ -181,6 +181,7 @@ This highlights the gap between local angular objectives and global structural e
 
 - EGNN positions were initialised from random noise rather than experimental C1′ coordinates, limiting the geometric inductive bias of the model
 - The internal coordinate decoder uses a simplified reconstruction that does not fully respect RNA backbone geometry, causing accumulated error in 3D coordinate reconstruction
+- Training was supervised only on pseudo-torsions (η, θ) rather than the full 8 backbone torsions extracted in Phase 1.4, leaving richer supervision signals unused
 - Secondary structure features were predicted using RNAfold (single MFE structure), which does not account for pseudoknots or conformational variability
 - These limitations explain the gap between local torsion-space training objectives and global topology-based evaluation metrics (TM-score, MCQ) — a challenge documented in the RNA structure prediction literature
 
@@ -195,8 +196,9 @@ Due to Kaggle rules, data is not redistributed here.
 To reproduce:
 
 1. Download competition dataset from Kaggle
-2. Place relevant CSVs under a local `features/` directory
-3. Run training and inference scripts as shown above
+2. Place relevant CSVs under a local `data/` directory
+3. Run preprocessing pipeline in order (see `preprocessing/`)
+4. Run training and inference scripts as shown above
 
 ---
 
@@ -205,6 +207,7 @@ To reproduce:
 - Replace random EGNN position initialisation with experimental C1′ coordinates
 - Implement proper Nerf-based internal coordinate reconstruction with correct RNA bond geometry
 - Integrate RNA language model embeddings (e.g. RNA-TorsionBERT) as per-residue conditioning features
+- Supervise on full 8 backbone torsions from Phase 1.4 instead of pseudo-torsions only
 - Von Mises / circular distributions for torsion uncertainty
 - Direct TM-score–aware training
 - Evaluate generated structures using RNAdvisor 2 (MCQ, TM-score, LCS-TA)
@@ -213,13 +216,14 @@ To reproduce:
 
 # Technical Stack
 
-- PyTorch
-- PyTorch Geometric
-- NumPy / SciPy
-- scikit-learn
-- ViennaRNA (RNAfold)
-- Diffusion modeling
-- Geometric deep learning
+- PyTorch + PyTorch Geometric
+- NumPy / SciPy / scikit-learn
+- BioPython (sequence alignment, PDB parsing)
+- ViennaRNA (RNAfold secondary structure)
+- HuggingFace Transformers (BERT surrogate model)
+- Optuna (hyperparameter optimisation)
+- joblib (incremental PCA persistence)
+- Diffusion modeling / Geometric deep learning
 
 ---
 
