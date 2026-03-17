@@ -1,5 +1,5 @@
 # RNA 3D Structure Prediction via Geometric Deep Learning & Diffusion Modeling
-
+**Parisa Farrokhian**
 ## Overview
 
 This project explores **geometric deep learning for RNA 3D structure generation**, inspired by the 2025 Stanford RNA 3D Folding challenge.
